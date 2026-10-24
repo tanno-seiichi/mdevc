@@ -1,0 +1,4 @@
+# VSIX に入れないもの（vsce package の対象外）
+.vscode/**
+.gitignore
+**/*.vsix

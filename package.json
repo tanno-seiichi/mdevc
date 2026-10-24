@@ -1,0 +1,127 @@
+{
+  "name": "mdevc",
+  "displayName": "mdevc（インライン編集に対応したシンプルな Markdown エディタ）",
+  "description": "Markdown ファイルを、プレビューと同じ見た目のまま直接編集できるエディタ（mdew の VS Code 版）",
+  "version": "0.0.1",
+  "publisher": "tanno-seiichi",
+  "license": "MIT",
+  "icon": "images/mde.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "editor",
+    "wysiwyg",
+    "mdew"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "mdevc.markdownEditor",
+        "displayName": "mdevc（Markdown エディタ）",
+        "selector": [
+          { "filenamePattern": "*.md" },
+          { "filenamePattern": "*.markdown" }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "mdevc.openWithTextEditor",
+        "title": "テキストエディタで開き直す",
+        "category": "mdevc",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "mdevc.openWithMdevc",
+        "title": "mdevc で開き直す",
+        "category": "mdevc",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "mdevc.openHelp",
+        "title": "ヘルプを開く",
+        "category": "mdevc",
+        "icon": "$(question)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mdevc.openWithTextEditor",
+          "when": "activeCustomEditorId == mdevc.markdownEditor",
+          "group": "navigation"
+        },
+        {
+          "command": "mdevc.openWithMdevc",
+          "when": "editorLangId == markdown && !isInDiffEditor",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "mdevc.openWithMdevc",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@9"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mdevc.openWithTextEditor",
+          "when": "activeCustomEditorId == mdevc.markdownEditor"
+        },
+        {
+          "command": "mdevc.openWithMdevc",
+          "when": "editorLangId == markdown"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "mdevc",
+      "properties": {
+        "mdevc.docStyle": {
+          "type": "string",
+          "enum": [ "github", "vscode" ],
+          "enumItemLabels": [ "GitHubスタイル", "VSCodeスタイル" ],
+          "enumDescriptions": [ "GitHub の Markdown に近い見た目", "Visual Studio Code の Markdown のプレビューに近い見た目" ],
+          "default": "github",
+          "order": 10,
+          "description": "表示スタイル（文書の見た目）。"
+        },
+        "mdevc.textColor": {
+          "type": "string",
+          "enum": [ "sharp", "soft" ],
+          "enumItemLabels": [ "くっきりした色", "目にやさしい色" ],
+          "enumDescriptions": [ "ほぼ黒（暗いテーマの時は明るい色）", "少し薄い灰色（暗いテーマの時は少し暗い色）" ],
+          "default": "sharp",
+          "order": 20,
+          "description": "文字の色。"
+        },
+        "mdevc.docWidth": {
+          "type": "string",
+          "enum": [ "limited", "full" ],
+          "enumItemLabels": [ "読みやすい幅にする（最大 884px）", "編集ペインの幅に合わせる" ],
+          "enumDescriptions": [ "最大 884px で中央に置く", "編集ペインの幅いっぱいに広げる" ],
+          "default": "limited",
+          "order": 30,
+          "description": "本文の幅。"
+        },
+        "mdevc.softBreak": {
+          "type": "string",
+          "enum": [ "join", "source" ],
+          "enumItemLabels": [ "空行が入るまで改行しない", "ソースの通りに改行する" ],
+          "enumDescriptions": [ "CommonMark・VS Code の Markdown のプレビューと同じ", "ソースの改行の位置で改行して表示する" ],
+          "default": "join",
+          "order": 40,
+          "description": "段落中の改行（空行を挟まない改行）の表示。保存する内容は、どちらでも変わらない。"
+        }
+      }
+    }
+  }
+}
