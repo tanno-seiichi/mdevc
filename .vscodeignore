@@ -1,4 +1,12 @@
-# VSIX に入れないもの（vsce package の対象外）
-.vscode/**
-.gitignore
-**/*.vsix
+# VSIX に入れるもの（vsce package の対象）だけを、! で指定する（それ以外は入れない。メモ等のファイルを
+# フォルダに置いても VSIX に入らないように）
+**
+!extension.js
+!src/**
+!web/**
+!help/**
+!images/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE.txt

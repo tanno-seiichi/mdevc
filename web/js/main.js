@@ -314,6 +314,39 @@ function applyOutlineMarks() {
     li.classList.toggle('search-hit', outlineMarks.hits.has(h));
     li.classList.toggle('search-current', outlineMarks.current === h);
   }
+  sendOutlineMarks();
+}
+
+// ---- mdevc：VS Code のサイドバーの「mdevc アウトライン」（src\outlineView.js）----------------
+/** 最後に作ったアウトラインの見出し（文書の順。ホストの revealHeading の番号で、その見出しへ移動する）。 */
+let outlineEntries = [];
+/** 最後にホストへ送ったアウトライン・検索の印（変わっていなければ送らない）。 */
+let sentOutline = '';
+let sentOutlineMarks = '';
+
+/** アウトライン（見出しのレベルと文字）をホストへ送る（renderOutline のたびに呼ぶ）。 */
+function sendOutline() {
+  const items = outlineEntries.map((e) => ({ level: e.level, text: e.text || '(無題)' }));
+  const json = JSON.stringify(items);
+  if (json === sentOutline) return;
+  sentOutline = json;
+  sentOutlineMarks = ''; // 見出しが変わったので、印も送り直す
+  send({ cmd: 'outline', items });
+}
+
+/** 検索で見つかった箇所を含む見出し・今の箇所の見出しを、見出しの番号でホストへ送る。 */
+function sendOutlineMarks() {
+  const hits = [];
+  let current = -1;
+  outlineEntries.forEach((e, i) => {
+    if (!e.heading) return;
+    if (outlineMarks.hits.has(e.heading)) hits.push(i);
+    if (outlineMarks.current === e.heading) current = i;
+  });
+  const json = JSON.stringify({ hits, current });
+  if (json === sentOutlineMarks) return;
+  sentOutlineMarks = json;
+  send({ cmd: 'outlineMarks', hits, current });
 }
 
 /**
@@ -344,6 +377,8 @@ function buildOutline() {
  * @param {{level:number, text:string, heading?:Element, jump:function}[]} a_entries 見出し（文書の順）
  */
 function renderOutline(a_entries) {
+  outlineEntries = a_entries;
+  sendOutline();
   const list = $('outline-list');
   list.replaceChildren();
   outlineItems = new Map();
@@ -2092,6 +2127,10 @@ if (host) {
       if (false !== msg.dirty) setDirty(true);
       wrap.scrollTop = scrollTop;
       findEngine.onDocumentLoaded();
+    } else if ('revealHeading' === msg.cmd) {
+      // mdevc：サイドバーの「mdevc アウトライン」で見出しをクリックした
+      const entry = outlineEntries[msg.index];
+      if (entry) entry.jump();
     } else if ('dirtyState' === msg.cmd) {
       // mdevc：VS Code の文書の、保存していない状態だけが変わった（保存した・元に戻して保存した時の内容に戻った等）
       if (!msg.dirty && state.dirty && !syncTimer) {

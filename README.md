@@ -19,6 +19,7 @@ Windows デスクトップ用の Markdown エディタ **mdew** の画面を、V
   テキストエディタから mdevc に戻す時は、右上の「mdevc で開き直す」ボタンを押します。
 - 保存（Ctrl+S）、元に戻す（Ctrl+Z）、未保存の印、閉じる時の確認、ほかのアプリでファイルが変更された時の読み直しは、通常のテキストファイルと同じく VS Code が行います。
 - 「フォルダーを指定して検索」（Ctrl+Shift+F）・「フォルダーを指定して置換」（Ctrl+Shift+H）も、そのまま使えます。置換した結果は、開いている mdevc の画面にもすぐに反映されます。
+- エクスプローラー（サイドバー）の「mdevc アウトライン」に、今の mdevc の画面の見出しの一覧を表示します（クリックでその見出しへ移動。検索で見つかった箇所を含む見出しは文字が強調されます）。VS Code 標準の「アウトライン」は、mdevc のような独自の編集画面の見出しを表示できないため、別のビューにしています。
 
 ### 設定
 
@@ -71,7 +72,10 @@ Ctrl+F（検索）・Ctrl+H（置換）で、画面の右上に検索と置換�
 | `extension.js` | 拡張機能の入り口（カスタムエディタとコマンドの登録） |
 | `src/markdownEditor.js` | 編集画面（webview）と VS Code の文書との同期、画像の貼り付け、リンクを開く等 |
 | `src/images.js` | 貼り付けた画像の保存、画像・リンクの参照先の解決 |
+| `src/outlineView.js` | エクスプローラーの「mdevc アウトライン」（VS Code 標準のアウトラインは独自の編集画面から使えないため） |
 | `src/log.js` | 動作の記録（「出力」パネルの「mdevc」） |
+| `CHANGELOG.md` | 変更履歴（拡張機能の詳細ページの「変更履歴」に表示される） |
+| `doc/` | 開発用のメモ（VSIX には入れない） |
 | `help/HELP.md` | ヘルプ（右クリックの「ヘルプを開く」で、読み取り専用で開く。mdevs の help\HELP.md と内容をそろえる） |
 | `web/` | 画面（mdevs の画面をコピーしたもの）。`js/host.js`（VS Code とのやり取り・キーの振り分け・配色）と `js/findbar.js`（検索と置換のバー）、`vscode.css` は mdevc で追加 |
 
@@ -88,10 +92,15 @@ Ctrl+F（検索）・Ctrl+H（置換）で、画面の右上に検索と置換�
 Node.js をインストールしてある PC で、このフォルダで次のコマンドを実行します（初回は vsce のダウンロードの確認が出ます）。
 
 ```
-npx @vscode/vsce package --allow-missing-repository
+npm run package
 ```
 
-`mdevc-<バージョン>.vsix` ができます。バージョンは `package.json` の `version` で変えます。
+（PowerShell でスクリプトの実行が無効になっている場合は `npm.cmd run package`。中身は `package.json` の `scripts` の
+`npx @vscode/vsce package --allow-missing-repository` です）
+
+`mdevc-<バージョン>.vsix` ができます。バージョンは `package.json` の `version` で変え、変更内容は `CHANGELOG.md` に
+書きます（拡張機能の詳細ページの「変更履歴」に表示されます）。VSIX に入れるファイルは `.vscodeignore` で決めてあるので、
+`doc` フォルダのメモ等は入りません。
 
 ## ライセンス
 

@@ -19,6 +19,9 @@
     "mdew"
   ],
   "main": "./extension.js",
+  "scripts": {
+    "package": "npx @vscode/vsce package --allow-missing-repository"
+  },
   "contributes": {
     "customEditors": [
       {
@@ -49,8 +52,22 @@
         "title": "ヘルプを開く",
         "category": "mdevc",
         "icon": "$(question)"
+      },
+      {
+        "command": "mdevc.revealHeading",
+        "title": "見出しへ移動",
+        "category": "mdevc"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "mdevc.outline",
+          "name": "mdevc アウトライン",
+          "when": "activeCustomEditorId == mdevc.markdownEditor"
+        }
+      ]
+    },
     "menus": {
       "editor/title": [
         {
@@ -79,6 +96,10 @@
         {
           "command": "mdevc.openWithMdevc",
           "when": "editorLangId == markdown"
+        },
+        {
+          "command": "mdevc.revealHeading",
+          "when": "false"
         }
       ]
     },

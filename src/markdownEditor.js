@@ -18,6 +18,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const log = require('./log');
 const images = require('./images');
+const { OutlineView } = require('./outlineView');
 
 /** カスタムエディタの種類の名前（package.json の customEditors の viewType）。 */
 const VIEW_TYPE = 'mdevc.markdownEditor';
@@ -96,9 +97,13 @@ class MarkdownEditor {
    * @param {vscode.ExtensionContext} a_context 拡張機能の情報
    * @param {vscode.TextDocument} a_document 文書
    * @param {vscode.WebviewPanel} a_panel 編集画面
+   * @param {OutlineView} a_outlineView サイドバーの「mdevc アウトライン」
    */
-  constructor(a_context, a_document, a_panel) {
+  constructor(a_context, a_document, a_panel, a_outlineView) {
     this.context = a_context;
+    this.outlineView = a_outlineView;
+    /** 画面側の見出し（{level, text} の配列）と、検索で見つかった箇所を含む見出し・今の箇所の見出しの番号。 */
+    this.outline = { items: [], hits: [], current: -1 };
     this.document = a_document;
     this.panel = a_panel;
     /** 画面側の準備ができたか（ready が届いた）。 */
@@ -134,6 +139,11 @@ class MarkdownEditor {
       }),
     );
     a_panel.onDidDispose(() => this.dispose());
+    // 「mdevc アウトライン」には、今アクティブな編集画面の見出しを表示する
+    a_panel.onDidChangeViewState(() => {
+      if (a_panel.active) this.outlineView.setEditor(this);
+    });
+    if (a_panel.active) this.outlineView.setEditor(this);
     log.write(`開きました：${this.displayPath}`);
   }
 
@@ -238,6 +248,14 @@ class MarkdownEditor {
           break;
         case 'edit':
           if (!this.readOnly) await this.applyWebText(a_msg.markdown);
+          break;
+        case 'outline':
+          this.outline = { items: a_msg.items || [], hits: [], current: -1 };
+          this.outlineView.onOutlineChanged(this);
+          break;
+        case 'outlineMarks':
+          this.outline = { ...this.outline, hits: a_msg.hits || [], current: a_msg.current ?? -1 };
+          this.outlineView.onOutlineChanged(this);
           break;
         case 'openHelp':
           await openHelp(this.context);
@@ -517,6 +535,7 @@ class MarkdownEditor {
 
   /** 編集画面を閉じた時。 */
   dispose() {
+    if (this.outlineView.editor === this) this.outlineView.setEditor(null);
     for (const d of this.disposables) d.dispose();
     this.disposables = [];
     for (const resolve of this.flushWaiters.values()) resolve(this.webText ?? toLf(this.document.getText()));
@@ -534,6 +553,7 @@ class MarkdownEditorProvider {
    */
   static register(a_context) {
     const provider = new MarkdownEditorProvider(a_context);
+    provider.outlineView = new OutlineView(a_context);
     a_context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {
         // 隠れているタブも画面を残しておく（切り替えるたびに読み直さない。画面側の元に戻す・表示の位置も残る）
@@ -557,6 +577,8 @@ class MarkdownEditorProvider {
     this.context = a_context;
     /** 開いている編集画面。 */
     this.editors = new Set();
+    /** サイドバーの「mdevc アウトライン」（register で作る）。 */
+    this.outlineView = null;
   }
 
   /**
@@ -565,7 +587,7 @@ class MarkdownEditorProvider {
    * @param {vscode.WebviewPanel} a_panel 編集画面
    */
   resolveCustomTextEditor(a_document, a_panel) {
-    const editor = new MarkdownEditor(this.context, a_document, a_panel);
+    const editor = new MarkdownEditor(this.context, a_document, a_panel, this.outlineView);
     this.editors.add(editor);
     a_panel.onDidDispose(() => this.editors.delete(editor));
   }

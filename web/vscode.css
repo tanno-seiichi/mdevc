@@ -1,5 +1,9 @@
 /* mdevc（mdew の VS Code 版）：VS Code の中で使う時の見た目（app.css の後に読み込む） */
 
+/* 画面の中のアウトライン（と、その幅を変える境界・ステータスバーの表示切り替えのボタン）は使わない（VS Code の
+   サイドバーの「mdevc アウトライン」を使う。src\outlineView.js。見出しの一覧は、そのために main.js が作る） */
+#outline, #splitter, #status-outline { display: none !important; }
+
 /* 検索と置換のバー（findbar.js）。VS Code のテキストエディタの検索のバーと同じ形・色（--vscode-* は VS Code が入れる色。
    ブラウザ単体で開いた時は括弧内の色） */
 #findbar {
