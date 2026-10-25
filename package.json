@@ -1,7 +1,7 @@
 {
   "name": "mdevc",
-  "displayName": "mdevc（インライン編集に対応したシンプルな Markdown エディタ）",
-  "description": "Markdown ファイルを、プレビューと同じ見た目のまま直接編集できるエディタ（mdew の VS Code 版）",
+  "displayName": "mdevc - Inline Markdown Editor for Visual Studio Code",
+  "description": "WYSIWYG Markdown editor: edit Markdown files directly in the preview. Markdown ファイルを、プレビューのまま直接編集できるエディタ（mdew の VS Code 版）",
   "version": "0.1.0",
   "publisher": "tanno-seiichi",
   "license": "MIT",
