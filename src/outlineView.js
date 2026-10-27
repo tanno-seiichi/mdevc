@@ -11,6 +11,7 @@
 // 見出しと検索の印は、編集画面（web\js\main.js の sendOutline・sendOutlineMarks）から届く。
 
 const vscode = require('vscode');
+const { t } = require('./i18n');
 
 /** ビューの名前（package.json の contributes.views）。 */
 const VIEW_ID = 'mdevc.outline';
@@ -87,7 +88,7 @@ class OutlineView {
     });
     this.hits = new Set(outline.hits);
     this.current = outline.current;
-    this.treeView.message = this.editor && !this.nodes.length ? '見出しがありません。' : undefined;
+    this.treeView.message = this.editor && !this.nodes.length ? t('見出しがありません。') : undefined;
     this.changed.fire();
     this.revealCurrent();
   }
@@ -132,7 +133,7 @@ class OutlineView {
       a_node.children.length ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
     item.id = a_node.id;
     item.tooltip = a_node.text;
-    item.command = { command: REVEAL_COMMAND, title: '見出しへ移動', arguments: [a_node.index] };
+    item.command = { command: REVEAL_COMMAND, title: t('見出しへ移動'), arguments: [a_node.index] };
     return item;
   }
 }

@@ -7,6 +7,9 @@
 !help/**
 !images/**
 !package.json
+!package.nls.json
+!package.nls.*.json
 !README.md
+!README.ja.md
 !CHANGELOG.md
 !LICENSE.txt

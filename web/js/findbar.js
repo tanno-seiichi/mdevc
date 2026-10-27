@@ -7,6 +7,8 @@
 //  - 置換の入力欄で Enter：置換して次へ、Ctrl+Alt+Enter：すべて置換
 //  - Alt+C：大文字と小文字を区別する、Alt+W：単語単位、Alt+R：正規表現
 
+import { t, translateDom, onLanguageChange } from './i18n.js';
+
 /**
  * id で要素を取得する。
  * @param {string} a_id 要素の id
@@ -55,8 +57,9 @@ export class FindBar {
     this.api = a_api;
     /** 検索の条件（大文字と小文字・単語単位・正規表現）。 */
     this.opts = { matchCase: false, wholeWord: false, regex: false };
-    /** 処理の結果の文（正規表現の誤り・置換した件数等。次の操作まで、件数の代わりに表示する）。 */
+    /** 処理の結果の文（正規表現の誤り・置換した件数等。次の操作まで、件数の代わりに表示する。[日本語の文（i18n.js の辞書のキー）, …値]。言語を変えた時に訳し直すため）。 */
     this.message = '';
+    this.messageIsError = false;
     this.statusTimer = 0;
     const bar = document.createElement('div');
     bar.id = 'findbar';
@@ -64,6 +67,12 @@ export class FindBar {
     bar.setAttribute('aria-label', '検索と置換');
     bar.innerHTML = BAR_HTML;
     document.body.append(bar);
+    // 文字を今の言語にする（言語を変えた時は、i18n.js の setLanguage が置き換え、下の onLanguageChange で作り直す）
+    translateDom(bar);
+    onLanguageChange(() => {
+      $('fb-toggle').title = this.replaceMode ? t('置換モードを閉じる') : t('置換モードの切り替え');
+      this.updateStatus();
+    });
     this.bar = bar;
     this.findInput = $('fb-find');
     this.replaceInput = $('fb-replace');
@@ -104,7 +113,7 @@ export class FindBar {
   setReplaceMode(a_on) {
     if (this.api.readOnly()) a_on = false; // 読み取り専用（ヘルプ）は置換しない
     this.bar.classList.toggle('replace', a_on);
-    $('fb-toggle').title = a_on ? '置換モードを閉じる' : '置換モードの切り替え';
+    $('fb-toggle').title = a_on ? t('置換モードを閉じる') : t('置換モードの切り替え');
   }
 
   /**
@@ -156,6 +165,7 @@ export class FindBar {
   /** 検索する文字列・条件を変えた時：今の箇所の先頭から探し直す（VS Code と同じく、入力するたびに探す）。 */
   search() {
     this.message = '';
+    this.messageIsError = false;
     if (!this.findInput.value) {
       this.api.close(); // 色を消す（入力欄からは入力を移さない）
       this.findInput.focus();
@@ -180,6 +190,7 @@ export class FindBar {
       return;
     }
     this.message = '';
+    this.messageIsError = false;
     const q = this.query;
     if ('prev' === a_action || 'next' === a_action) {
       this.api.find({ ...q, backward: 'prev' === a_action });
@@ -188,7 +199,7 @@ export class FindBar {
       if (this.api.replace({ ...q, all: false }) >= 0) this.api.find({ ...q, backward: false });
     } else if ('replaceAll' === a_action) {
       const count = this.api.replace({ ...q, all: true });
-      if (count > 0) this.message = `${count} 件を置換しました`;
+      if (count > 0) this.message = ['{0} 件を置換しました', count];
     }
     this.updateStatus();
   }
@@ -200,8 +211,9 @@ export class FindBar {
   onEngineUpdate(a_update) {
     if (!this.isOpen || 'string' !== typeof a_update.status) return;
     // 置換した件数の文は run で短く出すので、誤りの文だけを出す
-    if (/正規表現/.test(a_update.status)) {
-      this.message = '正規表現が正しくありません';
+    if (a_update.regexError) {
+      this.message = ['正規表現が正しくありません'];
+      this.messageIsError = true;
       this.updateStatus();
     }
   }
@@ -218,12 +230,12 @@ export class FindBar {
     let text = '';
     let none = false;
     if (this.message) {
-      text = this.message;
-      none = /正しくありません/.test(text);
+      text = Array.isArray(this.message) ? t(...this.message) : this.message;
+      none = !!this.messageIsError;
     } else if (this.findInput.value) {
       const { total, index } = this.api.findStatus();
       none = 0 === total;
-      text = none ? '結果なし' : `${index >= 0 ? index + 1 : '?'} / ${total}`;
+      text = none ? t('結果なし') : `${index >= 0 ? index + 1 : '?'} / ${total}`;
     }
     status.textContent = text;
     this.bar.classList.toggle('no-results', none);

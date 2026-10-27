@@ -1,10 +1,14 @@
 {
   "name": "mdevc",
   "displayName": "mdevc - Inline Markdown Editor for Visual Studio Code",
-  "description": "WYSIWYG Markdown editor: edit Markdown files directly in the preview. Markdown ファイルを、プレビューのまま直接編集できるエディタ（mdew の VS Code 版）",
+  "description": "%description%",
   "version": "0.1.2",
   "publisher": "tanno-seiichi",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tanno-seiichi/mdevc.git"
+  },
   "icon": "images/mde.png",
   "engines": {
     "vscode": "^1.90.0"
@@ -15,18 +19,17 @@
   "keywords": [
     "markdown",
     "editor",
-    "wysiwyg",
-    "mdew"
+    "wysiwyg"
   ],
   "main": "./extension.js",
   "scripts": {
-    "package": "npx @vscode/vsce package --allow-missing-repository"
+    "package": "npx @vscode/vsce package"
   },
   "contributes": {
     "customEditors": [
       {
         "viewType": "mdevc.markdownEditor",
-        "displayName": "mdevc（Markdown エディタ）",
+        "displayName": "%customEditor.displayName%",
         "selector": [
           { "filenamePattern": "*.md" },
           { "filenamePattern": "*.markdown" }
@@ -37,25 +40,25 @@
     "commands": [
       {
         "command": "mdevc.openWithTextEditor",
-        "title": "テキストエディタで開き直す",
+        "title": "%command.openWithTextEditor%",
         "category": "mdevc",
         "icon": "$(go-to-file)"
       },
       {
         "command": "mdevc.openWithMdevc",
-        "title": "mdevc で開き直す",
+        "title": "%command.openWithMdevc%",
         "category": "mdevc",
         "icon": "$(open-preview)"
       },
       {
         "command": "mdevc.openHelp",
-        "title": "ヘルプを開く",
+        "title": "%command.openHelp%",
         "category": "mdevc",
         "icon": "$(question)"
       },
       {
         "command": "mdevc.revealHeading",
-        "title": "見出しへ移動",
+        "title": "%command.revealHeading%",
         "category": "mdevc"
       }
     ],
@@ -63,7 +66,7 @@
       "explorer": [
         {
           "id": "mdevc.outline",
-          "name": "mdevc アウトライン",
+          "name": "%view.outline%",
           "when": "activeCustomEditorId == mdevc.markdownEditor"
         }
       ]
@@ -106,41 +109,50 @@
     "configuration": {
       "title": "mdevc",
       "properties": {
+        "mdevc.language": {
+          "type": "string",
+          "enum": [ "auto", "ja", "en" ],
+          "enumItemLabels": [ "%config.language.label1%", "%config.language.label2%", "%config.language.label3%" ],
+          "enumDescriptions": [ "%config.language.enum1%", "%config.language.enum2%", "%config.language.enum3%" ],
+          "default": "auto",
+          "order": 5,
+          "description": "%config.language.description%"
+        },
         "mdevc.docStyle": {
           "type": "string",
           "enum": [ "github", "vscode" ],
-          "enumItemLabels": [ "GitHubスタイル", "VSCodeスタイル" ],
-          "enumDescriptions": [ "GitHub の Markdown に近い見た目", "Visual Studio Code の Markdown のプレビューに近い見た目" ],
+          "enumItemLabels": [ "%config.docStyle.label1%", "%config.docStyle.label2%" ],
+          "enumDescriptions": [ "%config.docStyle.enum1%", "%config.docStyle.enum2%" ],
           "default": "github",
           "order": 10,
-          "description": "表示スタイル（文書の見た目）。"
+          "description": "%config.docStyle.description%"
         },
         "mdevc.textColor": {
           "type": "string",
           "enum": [ "sharp", "soft" ],
-          "enumItemLabels": [ "くっきりした色", "目にやさしい色" ],
-          "enumDescriptions": [ "ほぼ黒（暗いテーマの時は明るい色）", "少し薄い灰色（暗いテーマの時は少し暗い色）" ],
+          "enumItemLabels": [ "%config.textColor.label1%", "%config.textColor.label2%" ],
+          "enumDescriptions": [ "%config.textColor.enum1%", "%config.textColor.enum2%" ],
           "default": "sharp",
           "order": 20,
-          "description": "文字の色。"
+          "description": "%config.textColor.description%"
         },
         "mdevc.docWidth": {
           "type": "string",
           "enum": [ "limited", "full" ],
-          "enumItemLabels": [ "読みやすい幅にする（最大 884px）", "編集ペインの幅に合わせる" ],
-          "enumDescriptions": [ "最大 884px で中央に置く", "編集ペインの幅いっぱいに広げる" ],
+          "enumItemLabels": [ "%config.docWidth.label1%", "%config.docWidth.label2%" ],
+          "enumDescriptions": [ "%config.docWidth.enum1%", "%config.docWidth.enum2%" ],
           "default": "limited",
           "order": 30,
-          "description": "本文の幅。"
+          "description": "%config.docWidth.description%"
         },
         "mdevc.softBreak": {
           "type": "string",
           "enum": [ "join", "source" ],
-          "enumItemLabels": [ "空行が入るまで改行しない", "ソースの通りに改行する" ],
-          "enumDescriptions": [ "CommonMark・VS Code の Markdown のプレビューと同じ", "ソースの改行の位置で改行して表示する" ],
+          "enumItemLabels": [ "%config.softBreak.label1%", "%config.softBreak.label2%" ],
+          "enumDescriptions": [ "%config.softBreak.enum1%", "%config.softBreak.enum2%" ],
           "default": "join",
           "order": 40,
-          "description": "段落中の改行（空行を挟まない改行）の表示。保存する内容は、どちらでも変わらない。"
+          "description": "%config.softBreak.description%"
         }
       }
     }

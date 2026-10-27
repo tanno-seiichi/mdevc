@@ -1,107 +1,139 @@
 # mdevc
 
-mdevc は、Markdown ファイルをプレビューと同じ見た目のまま直接編集できる、Visual Studio Code の拡張機能です。
-Windows デスクトップ用の Markdown エディタ **mdew** の画面を、VS Code の中で使えるようにしたものです（Visual Studio 版の **mdevs** の VS Code 版）。
+mdevc is a Visual Studio Code extension that lets you edit Markdown files directly, in a view that looks just like the
+preview (WYSIWYG). There is no separate editing pane and preview pane, so you can keep writing while you see exactly
+how the formatting looks.
 
-## インストール
+The editor is available in English and Japanese (see the Language setting below).
 
-1. 配布された `mdevc-<バージョン>.vsix` を用意します。
-2. VS Code の「拡張機能」ビュー（Ctrl+Shift+X）の右上の「…」から「VSIX からのインストール...」を選び、`.vsix` ファイルを選びます。
-   コマンドプロンプトからは `code --install-extension mdevc-<バージョン>.vsix` でもインストールできます。
+日本語の説明は [README.ja.md](README.ja.md) を参照してください。
 
-対応する VS Code は 1.90 以降です。
+## Installation
 
-## 使い方
+Search for "mdevc" in the Extensions view of VS Code (Ctrl+Shift+X) and install it.
 
-- `.md`・`.markdown` のファイルを開くと、mdevc の編集画面で開きます。
-- 書式の書き方・表の操作などの使い方は、編集画面の右クリック→「ヘルプを開く」（コマンドパレットの「mdevc: ヘルプを開く」でも同じ）で表示されるヘルプ（読み取り専用）を見てください。
-- テキストとして編集したい時は、エディタの右上の「テキストエディタで開き直す」ボタンを押します（コマンドパレットの「mdevc: テキストエディタで開き直す」でも同じです）。
-  テキストエディタから mdevc に戻す時は、右上の「mdevc で開き直す」ボタンを押します。
-- 保存（Ctrl+S）、元に戻す（Ctrl+Z）、未保存の印、閉じる時の確認、ほかのアプリでファイルが変更された時の読み直しは、通常のテキストファイルと同じく VS Code が行います。
-- 「フォルダーを指定して検索」（Ctrl+Shift+F）・「フォルダーを指定して置換」（Ctrl+Shift+H）も、そのまま使えます。置換した結果は、開いている mdevc の画面にもすぐに反映されます。
-- エクスプローラー（サイドバー）の「mdevc アウトライン」に、今の mdevc の画面の見出しの一覧を表示します（クリックでその見出しへ移動。検索で見つかった箇所を含む見出しは文字が強調されます）。VS Code 標準の「アウトライン」は、mdevc のような独自の編集画面の見出しを表示できないため、別のビューにしています。
+To install from a `.vsix` file:
 
-### 設定
+1. Get the `mdevc-<version>.vsix` file.
+2. In the Extensions view of VS Code (Ctrl+Shift+X), open the "…" menu at the top right, choose
+   "Install from VSIX...", and select the `.vsix` file.
+   You can also install it from a command prompt with `code --install-extension mdevc-<version>.vsix`.
 
-「ファイル」→「ユーザー設定」→「設定」（Ctrl+,）で「mdevc」を検索すると、次の設定を変えられます。変えた設定は、開いているすべての画面にすぐに反映されます。
+Requires VS Code 1.90 or later.
 
-| 設定 | 内容 |
+## Usage
+
+- `.md` and `.markdown` files open in the mdevc editor.
+- For how to write formatting, work with tables, and so on, see the help (read-only), which opens from the editor's
+  right-click menu → Open Help, or from "mdevc: Open Help" in the Command Palette.
+  The help is shown in the language of the editor (see the Language setting below).
+- To edit a file as plain text, click the "Reopen with Text Editor" button at the top right of the editor
+  (or run "mdevc: Reopen with Text Editor" from the Command Palette).
+  To go back to mdevc from the text editor, click the "Reopen with mdevc" button at the top right.
+- Save (Ctrl+S), undo (Ctrl+Z), the unsaved-changes marker, confirmation when closing, and reloading when another app
+  changes the file are all handled by VS Code, just as for normal text files.
+- Find in Files (Ctrl+Shift+F) and Replace in Files (Ctrl+Shift+H) also work as usual. Replacements are shown
+  immediately in any open mdevc editor.
+- The "mdevc Outline" view in the Explorer (side bar) lists the headings of the current mdevc editor (click one to move
+  to it; headings that contain search matches are emphasized). It is a separate view because the standard VS Code
+  "Outline" cannot show the headings of a custom editor such as mdevc.
+
+### Settings
+
+Open File > Preferences > Settings (Ctrl+,) and search for "mdevc" to change the following settings. Changes are
+applied immediately to all open editors.
+
+| Setting | Values |
 |---|---|
-| 表示スタイル | GitHubスタイル（既定）／VSCodeスタイル |
-| 文字の色 | くっきりした色（既定）／目にやさしい色 |
-| 本文の幅 | 読みやすい幅にする（最大 884px。既定）／編集ペインの幅に合わせる |
-| 段落中の改行 | 空行が入るまで改行しない（既定）／ソースの通りに改行する |
+| Language | Auto (default; follows the VS Code display language: Japanese if it is Japanese, otherwise English) / 日本語 (Japanese) / English |
+| Doc Style | GitHub style (default) / VS Code style |
+| Text Color | Sharp (default) / Easy on the eyes |
+| Doc Width | Readable width (max 884px, default) / Fit to the editor width |
+| Soft Break | Do not break until a blank line (default) / Break lines as in the source |
 
-配色（明るい・暗い）は、VS Code の配色に合わせて自動で切り替わります。
+The Language setting applies to the editor screen, the messages of the extension, and the help. The names of commands
+and settings shown by VS Code itself (such as in the Command Palette and the Settings editor) follow the VS Code display
+language.
 
-### 検索と置換
+The light or dark appearance follows the VS Code color theme automatically.
 
-Ctrl+F（検索）・Ctrl+H（置換）で、画面の右上に検索と置換のバーを表示します（VS Code のテキストエディタの検索と同じ操作です）。
+### Find and replace
 
-| 操作 | キー |
+Ctrl+F (find) and Ctrl+H (replace) show a find and replace bar at the top right of the editor (it works like find in
+the VS Code text editor).
+
+| Operation | Keys |
 |---|---|
-| 次を検索・前を検索 | Enter・Shift+Enter（F3・Shift+F3） |
-| 置換して次へ | 置換の入力欄で Enter |
-| すべて置換 | Ctrl+Alt+Enter |
-| 大文字と小文字を区別する・単語単位・正規表現 | Alt+C・Alt+W・Alt+R |
-| 閉じる | Esc |
+| Find next / find previous | Enter / Shift+Enter (F3 / Shift+F3) |
+| Replace and find next | Enter in the replace box |
+| Replace all | Ctrl+Alt+Enter |
+| Match case / whole word / regular expression | Alt+C / Alt+W / Alt+R |
+| Close | Esc |
 
-### キー操作
+### Keyboard
 
-編集画面で使うキー（文字の入力、太字の Ctrl+B・斜体の Ctrl+I・下線の Ctrl+U、元に戻す・やり直し、コピー・貼り付け、表示倍率の Ctrl++・Ctrl+-・Ctrl+0、取り消し線の Alt+Shift+5 等）は、編集画面が受け取ります。
-それ以外のキー（Ctrl+S・Ctrl+P・Ctrl+Tab・Ctrl+W・F5・Ctrl+Shift+P 等）は、VS Code のショートカットとして動きます。
+Keys used for editing (typing, Ctrl+B bold, Ctrl+I italic, Ctrl+U underline, undo / redo, copy / paste, zoom with
+Ctrl++ / Ctrl+- / Ctrl+0, Alt+Shift+5 strikethrough, etc.) are handled by the editor.
+Other keys (Ctrl+S, Ctrl+P, Ctrl+Tab, Ctrl+W, F5, Ctrl+Shift+P, etc.) work as VS Code shortcuts.
 
-### 画像の貼り付け
+### Pasting images
 
-クリップボードの画像を貼り付けると、編集しているファイルの隣の「`<ファイル名>.images`」フォルダに `clipboard_image_1.png` のような名前ですぐに保存し、そのフォルダへの相対パスを文書に書きます（mdew は保存する時に画像を保存しますが、mdevc では貼り付けた時に保存します）。
-保存していない新しいファイルには、画像を貼り付けられません。
+When you paste an image from the clipboard, it is saved right away in a "`<file name>.images`" folder next to the file
+you are editing, with a name such as `clipboard_image_1.png`, and a relative path to it is written into the document.
+You cannot paste images into a new file that has never been saved.
 
-### mdew・mdevs との違い
+### Known limitations
 
-- メニューバー・フォルダビュー・PDF への書き出しはありません（ファイルを開く・フォルダの操作は VS Code のものを使います）。
-- 「フォルダーを指定して検索」の結果から開いた時、その箇所へは移動しません（ファイルの先頭を表示します）。その箇所を見たい時は、検索と置換のバー（Ctrl+F）で探してください。
-- 画像の参照先を `C:\dir\a.png` のような絶対パスで書いた画像は表示されません（相対パスで書いた画像は表示されます）。
-- 「Excel用にコピー」で、表の中の画像が Excel に貼り付けられないことがあります（VS Code の拡張機能からは、mdew と同じ形でクリップボードに書き込めないため）。
+- When you open a file from the Find in Files results, the editor does not move to the match (it shows the start of
+  the file). To see the match, find it with the find and replace bar (Ctrl+F).
+- Images written with an absolute path such as `C:\dir\a.png` are not shown (images with a relative path are shown).
+- With "Copy for Excel", images in a table may not paste into Excel (because of how a VS Code extension can write to
+  the clipboard).
 
-## 開発
+## Development
 
-### フォルダの構成
+### Folder structure
 
-| 場所 | 内容 |
+| Path | Contents |
 |---|---|
-| `extension.js` | 拡張機能の入り口（カスタムエディタとコマンドの登録） |
-| `src/markdownEditor.js` | 編集画面（webview）と VS Code の文書との同期、画像の貼り付け、リンクを開く等 |
-| `src/images.js` | 貼り付けた画像の保存、画像・リンクの参照先の解決 |
-| `src/outlineView.js` | エクスプローラーの「mdevc アウトライン」（VS Code 標準のアウトラインは独自の編集画面から使えないため） |
-| `src/log.js` | 動作の記録（「出力」パネルの「mdevc」） |
-| `CHANGELOG.md` | 変更履歴（拡張機能の詳細ページの「変更履歴」に表示される） |
-| `doc/` | 開発用のメモ（VSIX には入れない） |
-| `help/HELP.md` | ヘルプ（右クリックの「ヘルプを開く」で、読み取り専用で開く。mdevs の help\HELP.md と内容をそろえる） |
-| `web/` | 画面（mdevs の画面をコピーしたもの）。`js/host.js`（VS Code とのやり取り・キーの振り分け・配色）と `js/findbar.js`（検索と置換のバー）、`vscode.css` は mdevc で追加 |
+| `extension.js` | Entry point of the extension (registers the custom editor and commands) |
+| `src/markdownEditor.js` | Syncing between the editor screen (webview) and the VS Code document, pasting images, opening links, etc. |
+| `src/images.js` | Saving pasted images, resolving image and link targets |
+| `src/outlineView.js` | "mdevc Outline" in the Explorer (the standard VS Code Outline cannot be used from a custom editor) |
+| `src/i18n.js` | English text of the messages shown by the extension (the Japanese text is the key) |
+| `src/log.js` | Log (the "mdevc" channel in the Output panel) |
+| `package.nls.json` / `package.nls.ja.json` | Display strings in `package.json` (settings, commands, etc.) in English / Japanese |
+| `README.md` / `README.ja.md` | This file (English) / Japanese version |
+| `CHANGELOG.md` | Change log (shown on the "Changelog" tab of the extension's details page) |
+| `doc/` | Development notes (not included in the VSIX) |
+| `help/HELP.en.md` / `help/HELP.md` | Help in English / Japanese (opened read-only from the right-click menu → Open Help. The one for the language of the editor is opened) |
+| `web/` | Editor screen (HTML, JavaScript, CSS). `js/host.js` (communication with VS Code, key routing, colors), `js/findbar.js` (find and replace bar), `js/i18n.js` (English text of the editor screen; the Japanese text is the key) |
 
-ビルドの手順はありません（JavaScript のまま動きます）。
+There is no build step (the extension runs as plain JavaScript).
 
-### 動作の確認
+### Trying it out
 
-1. このフォルダを VS Code で開きます。
-2. F5 を押すと、mdevc を読み込んだ VS Code（拡張機能開発ホスト）が起動するので、`.md` ファイルを開いて確かめます。
-3. 動作の記録は「出力」パネル（Ctrl+Shift+U）で「mdevc」を選ぶと表示されます。画面側は、編集画面で F12 を押すと開発者ツールが開きます。
+1. Open this folder in VS Code.
+2. Press F5 to start a VS Code instance with mdevc loaded (Extension Development Host), and open a `.md` file.
+3. The log is shown in the Output panel (Ctrl+Shift+U) by choosing "mdevc". For the editor screen itself, press F12 in
+   the editor to open the developer tools.
 
-### 配布用の VSIX の作り方
+### Building the VSIX
 
-Node.js をインストールしてある PC で、このフォルダで次のコマンドを実行します（初回は vsce のダウンロードの確認が出ます）。
+On a PC with Node.js installed, run the following command in this folder (the first time, you are asked to confirm
+downloading vsce).
 
 ```
 npm run package
 ```
 
-（PowerShell でスクリプトの実行が無効になっている場合は `npm.cmd run package`。中身は `package.json` の `scripts` の
-`npx @vscode/vsce package --allow-missing-repository` です）
+(If running scripts is disabled in PowerShell, use `npm.cmd run package`. It runs `vsce package` from `scripts` in
+`package.json`.)
 
-`mdevc-<バージョン>.vsix` ができます。バージョンは `package.json` の `version` で変え、変更内容は `CHANGELOG.md` に
-書きます（拡張機能の詳細ページの「変更履歴」に表示されます）。VSIX に入れるファイルは `.vscodeignore` で決めてあるので、
-`doc` フォルダのメモ等は入りません。
+This creates `mdevc-<version>.vsix`. Change the version with `version` in `package.json`, and record the changes in
+`CHANGELOG.md` (shown on the "Changelog" tab of the extension's details page). The files to include in the VSIX are
+listed in `.vscodeignore`, so notes in the `doc` folder and similar files are not included.
 
-## ライセンス
+## License
 
-MIT License（LICENSE.txt）
+MIT License (LICENSE.txt)

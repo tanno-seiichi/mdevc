@@ -18,6 +18,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const log = require('./log');
 const images = require('./images');
+const { language, t } = require('./i18n');
 const { OutlineView } = require('./outlineView');
 
 /** カスタムエディタの種類の名前（package.json の customEditors の viewType）。 */
@@ -28,13 +29,31 @@ const FLUSH_TIMEOUT_MS = 3000;
 const MAX_TABLE_ROWS = 50;
 const MAX_TABLE_COLS = 20;
 
+/** ヘルプのファイル名（拡張機能の help フォルダ。日本語・英語）。 */
+const HELP_FILES = { ja: 'HELP.md', en: 'HELP.en.md' };
+
 /**
- * ヘルプのファイル（拡張機能の help\HELP.md。右クリックの「ヘルプを開く」で、読み取り専用で開く）。
+ * ヘルプのファイル（右クリックの「ヘルプを開く」で、読み取り専用で開く）。言語（設定の mdevc.language。自動の時は
+ * VS Code の表示言語）が日本語の時は help\HELP.md（日本語）、それ以外の時は help\HELP.en.md（英語）。
  * @param {vscode.ExtensionContext} a_context 拡張機能の情報
  * @returns {vscode.Uri}
  */
 function helpUri(a_context) {
-  return vscode.Uri.joinPath(a_context.extensionUri, 'help', 'HELP.md');
+  const file = 'ja' === language() ? HELP_FILES.ja : HELP_FILES.en;
+  return vscode.Uri.joinPath(a_context.extensionUri, 'help', file);
+}
+
+/**
+ * ヘルプのファイル（日本語・英語のどちらか）か。
+ * @param {vscode.ExtensionContext} a_context 拡張機能の情報
+ * @param {vscode.Uri} a_uri 文書の場所
+ * @returns {boolean}
+ */
+function isHelpUri(a_context, a_uri) {
+  if ('file' !== a_uri.scheme) return false;
+  const target = path.normalize(a_uri.fsPath).toLowerCase();
+  return Object.values(HELP_FILES).some((f) =>
+    path.normalize(vscode.Uri.joinPath(a_context.extensionUri, 'help', f).fsPath).toLowerCase() === target);
 }
 
 /**
@@ -88,6 +107,8 @@ function createSettingsMessage() {
     textColor: 'soft' === config.get('textColor') ? 'soft' : 'sharp',
     fullWidth: 'full' === config.get('docWidth'),
     joinSoftBreaks: 'source' !== config.get('softBreak'),
+    // 画面の言語（'ja'・'en'。設定の mdevc.language。自動の時は VS Code の表示言語。i18n.js）
+    language: language(),
   };
 }
 
@@ -120,8 +141,7 @@ class MarkdownEditor {
     /** 後始末するもの。 */
     this.disposables = [];
     /** 読み取り専用か（ヘルプ。画面側で編集できなくし、文書にも反映しない）。 */
-    this.readOnly = 'file' === a_document.uri.scheme &&
-      path.normalize(a_document.uri.fsPath).toLowerCase() === path.normalize(helpUri(a_context).fsPath).toLowerCase();
+    this.readOnly = isHelpUri(a_context, a_document.uri);
 
     const webview = a_panel.webview;
     webview.options = { enableScripts: true, localResourceRoots: this.resourceRoots() };
@@ -305,7 +325,7 @@ class MarkdownEditor {
       }
     } catch (ex) {
       log.write(`画面側からのメッセージ（${a_msg.cmd}）の処理中にエラー`, ex);
-      vscode.window.showErrorMessage(`処理中にエラーが発生しました。${ex instanceof Error ? ex.message : ex}`);
+      vscode.window.showErrorMessage(t('処理中にエラーが発生しました。{0}', ex instanceof Error ? ex.message : ex));
     }
   }
 
@@ -408,7 +428,7 @@ class MarkdownEditor {
    */
   async openUrl(a_url) {
     if (!/^(https?:|mailto:)/i.test(a_url || '')) {
-      vscode.window.showWarningMessage(`このリンクは開けません。${a_url}`);
+      vscode.window.showWarningMessage(t('このリンクは開けません。{0}', a_url));
       return;
     }
     await vscode.env.openExternal(vscode.Uri.parse(a_url, true));
@@ -422,7 +442,7 @@ class MarkdownEditor {
   async openRelative(a_relativePath) {
     const uri = this.docFolder ? images.resolveReference(this.document.uri, a_relativePath, false) : null;
     if (!uri || !(await images.exists(uri))) {
-      vscode.window.showWarningMessage(`リンク先のファイルが見つかりません。${a_relativePath}`);
+      vscode.window.showWarningMessage(t('リンク先のファイルが見つかりません。{0}', a_relativePath));
       return;
     }
     await vscode.commands.executeCommand('vscode.open', uri);
@@ -440,7 +460,7 @@ class MarkdownEditor {
     }
     const uri = this.docFolder || /^(file:|[a-zA-Z]:[\\/])/i.test(src) ? images.resolveReference(this.document.uri, src) : null;
     if (!uri || !(await images.exists(uri))) {
-      vscode.window.showWarningMessage(`この画像は開けません（元のファイルが見つからないか、埋め込みの画像です）。${src}`);
+      vscode.window.showWarningMessage(t('この画像は開けません（元のファイルが見つからないか、埋め込みの画像です）。{0}', src));
       return;
     }
     await vscode.env.openExternal(uri);
@@ -454,7 +474,7 @@ class MarkdownEditor {
    */
   canStoreImages() {
     if (this.docFolder) return true;
-    vscode.window.showWarningMessage('画像を貼り付けるには、先にファイルを保存してください（画像はファイルの隣の「<ファイル名>.images」フォルダに保存します）。');
+    vscode.window.showWarningMessage(t('画像を貼り付けるには、先にファイルを保存してください（画像はファイルの隣の「<ファイル名>.images」フォルダに保存します）。'));
     return false;
   }
 
@@ -472,7 +492,7 @@ class MarkdownEditor {
       this.post({ cmd: 'imagePasted', id: a_id, url: rel, alt: path.posix.basename(rel).replace(/\.[^.]*$/, '') });
     } catch (ex) {
       log.write('クリップボードの画像を保存できませんでした', ex);
-      vscode.window.showErrorMessage(`クリップボードの画像を貼り付けられませんでした。${ex instanceof Error ? ex.message : ex}`);
+      vscode.window.showErrorMessage(t('クリップボードの画像を貼り付けられませんでした。{0}', ex instanceof Error ? ex.message : ex));
     }
   }
 
@@ -508,14 +528,14 @@ class MarkdownEditor {
       return m ? { rows: Number(m[1]), cols: Number(m[2]) } : null;
     };
     const value = await vscode.window.showInputBox({
-      title: '表を挿入',
-      prompt: '行数（見出し行を含む）× 列数を入力してください（例：3x3）',
+      title: t('表を挿入'),
+      prompt: t('行数（見出し行を含む）× 列数を入力してください（例：3x3）'),
       value: '3x3',
       validateInput: (a_text) => {
         const size = parse(a_text);
-        if (!size) return '「行数x列数」の形で入力してください（例：3x3）';
-        if (size.rows < 1 || size.rows > MAX_TABLE_ROWS) return `行数は 1〜${MAX_TABLE_ROWS} にしてください`;
-        if (size.cols < 1 || size.cols > MAX_TABLE_COLS) return `列数は 1〜${MAX_TABLE_COLS} にしてください`;
+        if (!size) return t('「行数x列数」の形で入力してください（例：3x3）');
+        if (size.rows < 1 || size.rows > MAX_TABLE_ROWS) return t('行数は 1〜{0} にしてください', MAX_TABLE_ROWS);
+        if (size.cols < 1 || size.cols > MAX_TABLE_COLS) return t('列数は 1〜{0} にしてください', MAX_TABLE_COLS);
         return null;
       },
     });
@@ -526,8 +546,8 @@ class MarkdownEditor {
   /** 右クリックのメニュー「リンクにする…」：リンク先の URL を聞く（結果は linkUrl。取りやめは空）。 */
   async askLinkUrl() {
     const value = await vscode.window.showInputBox({
-      title: 'リンクにする',
-      prompt: 'リンク先の URL を入力してください',
+      title: t('リンクにする'),
+      prompt: t('リンク先の URL を入力してください'),
       placeHolder: 'https://',
     });
     this.post({ cmd: 'linkUrl', url: (value || '').trim() });
@@ -567,6 +587,8 @@ class MarkdownEditorProvider {
         if (!e.affectsConfiguration('mdevc')) return;
         log.write('設定が変わりました。');
         for (const editor of provider.editors) editor.postSettings();
+        // 言語を変えた時は、サイドバーの「mdevc アウトライン」の文字も作り直す
+        if (e.affectsConfiguration('mdevc.language')) provider.outlineView.refresh();
       }),
     );
     return provider;
