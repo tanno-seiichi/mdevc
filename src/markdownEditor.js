@@ -245,6 +245,8 @@ class MarkdownEditor {
           if (this.readOnly) this.post({ cmd: 'readOnly', value: true });
           this.postSettings();
           this.postLoad();
+          // 設定・文書を送り終えたので、画面を見せてもらう（起動直後のちらつき防止。main.js の reveal）
+          this.post({ cmd: 'reveal' });
           break;
         case 'edit':
           if (!this.readOnly) await this.applyWebText(a_msg.markdown);
